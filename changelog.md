@@ -1,5 +1,13 @@
 ## grblHAL changelog
 
+<a name="20260312">Build 20260312
+
+Core:
+
+* Added platform specific formatting strings for int32_t, "hardened" task handler code.
+
+---
+
 <a name="20260311">Build 20260311
 
 Core:
@@ -15,7 +23,7 @@ Plugins:
 * SD card: added `$PWD` command for outputting current working directory and `$CWD=<directory>` as an alternative to `$F=<directory>` to set current working directory.  
 `<directory>` can be `..` for up one level, `/` for the root directory, a single directory name or a path to a directory - either relative to CWD or absolute.
 
-* Spindle: delayed on actions on soft reset till after reset is cleared.
+* Spindle: delayed actions on soft reset till after reset is cleared.
 
 * Networking, ftp: improved handling of current working directory. Note that this is not the same as maintained by the core.
 

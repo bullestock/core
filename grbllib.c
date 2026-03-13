@@ -122,12 +122,17 @@ __attribute__((always_inline)) static inline void task_free (core_task_t *task)
 
 __attribute__((always_inline)) static inline core_task_t *task_run (core_task_t *task)
 {
+    hal.irq_disable();
+
     core_task_t *t = task;
     foreground_task_ptr fn = task->fn;
     void *data = task->data;
 
     task = task->next;
     task_free(t);
+
+    hal.irq_enable();
+
     fn(data);
 
     return task;
@@ -536,7 +541,7 @@ FLASHMEM int grbl_enter (void)
             protocol_enqueue_realtime_command(sys.mpg_mode ? CMD_STATUS_REPORT_ALL : CMD_STATUS_REPORT);
 
         if(tasks.on_reset)
-            system_set_exec_state_flag(EXEC_RT_COMMAND);  // execute any on reset tasks
+            system_set_exec_state_flag(EXEC_RT_COMMAND);  // execute any reset tasks
 
         // Start main loop. Processes program inputs and executes them.
         if(!(looping = protocol_main_loop()))
@@ -578,11 +583,6 @@ static void task_execute (sys_state_t state)
 
     core_task_t *task;
 
-    if(lock)
-        return;
-
-    lock = true;
-
     if(tasks.immediate && sys.driver_started) {
 
         hal.irq_disable();
@@ -593,6 +593,11 @@ static void task_execute (sys_state_t state)
         if(task) do {
         } while((task = task_run(task)));
     }
+
+    if(lock)
+        return;
+
+    lock = true;
 
     uint32_t now = hal.get_elapsed_ticks();
     if(!(now == last_ms || tasks.delayed == tasks.systick)) {
@@ -619,11 +624,11 @@ static void task_execute (sys_state_t state)
                 }
             }
 
-            hal.irq_enable();
-
             void *data = task->data;
             foreground_task_ptr fn = task->fn;
             task_free(task);
+
+            hal.irq_enable();
 
             fn(data);
         }
