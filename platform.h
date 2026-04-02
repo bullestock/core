@@ -51,9 +51,12 @@
 #define INT32SFMT "li"
 #define UINT32FMT "%lu"
 #define UINT32SFMT "lu"
-#else
-#define INT32FMT "%i"
-#define INT32SFMT "i"
-#define UINT32FMT "%u"
-#define UINT32SFMT "u"
+#elif defined(GRBL_ESP32)
+#include <inttypes.h>
+#define XSTR(x) STR(x)
+#define STR(x) #x
+#define INT32FMT "%" PRI32
+#define INT32SFMT PRI32
+#define UINT32FMT "%" PRIu32
+#define UINT32SFMT PRIu32
 #endif
